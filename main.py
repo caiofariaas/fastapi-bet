@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database import *
 from models import *
 from typing import List
+from methods import create_access_token
 
 app = FastAPI()
 
@@ -15,6 +16,10 @@ async def create_user(newUser: user, db: Session = Depends(get_db)):
     
     if exists:
         raise HTTPException(status_code=409, detail="username is already being used")
+    
+    # TOKEN GEN FUNCTION
+    
+    newUser.token = create_access_token(newUser.username)
     
     db_user = UserDB(**newUser.model_dump())
     

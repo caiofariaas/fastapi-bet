@@ -10,6 +10,7 @@ class user(BaseModel):
     name: str
     username: str
     password: str
+    token: str = None
     
     @validator('password')
     def valid_password(cls, value):
@@ -28,7 +29,7 @@ class userRead(BaseModel):
     name: str
     username: str
     password: str
-
+    token: str = None
 
 class UserDB(Base):
     __tablename__ = 'users'
@@ -37,3 +38,4 @@ class UserDB(Base):
     name = Column(String)
     username = Column(String)
     password = Column(String)
+    token = Column(String)
