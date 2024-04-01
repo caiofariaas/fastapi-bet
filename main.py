@@ -4,6 +4,7 @@ from database import *
 from models import *
 from typing import List
 from methods import create_access_token
+import requests 
 
 app = FastAPI()
 
@@ -69,6 +70,63 @@ async def delete_user(id : int, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=404, detail='User Not Found')
     
+@app.get('/api/match')
+async def get_matches():
+    lista = []
+    
+    response = requests.get('https://api.sportmonks.com/v3/football/fixtures/upcoming/markets/1?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb')
+    data = response.json()
+    
+    for match in data['data']:
+        if match['has_odds'] == True:
+            
+            objeto = {}
+                        
+            id = match['id']
+            name = match['name']
+            date = match['starting_at']
+            
+            objeto['id'] = id
+            objeto['name'] = name
+            objeto['date'] = date
+            
+        lista.append(objeto)
+            
+    return lista
+
+# Terminar
+
+@app.get('/api/match/{id}')
+async def get_match_by_id(id: int):
+    
+    response = requests.get(f'https://api.sportmonks.com/v3/football/odds/pre-match/fixtures/{id}?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb')
+    
+    data = response.json()
+    lista = []
+    
+    for match in data['data']:
+        objetoWinner = {}
+        
+        if match['market_description'] == 'Match Winner':
+            
+            if match['label'] == 'Away':
+                
+                if len(lista) > 0:
+                    
+                    for i in lista:
+                        if i['label'] == 'Away':
+                            yorno = True
+                            break
+                        
+                    if yorno:
+                        break
+                        
+                objetoWinner['label'] = match['label']
+                objetoWinner['odd'] = match['value']
+
+                lista.append(objetoWinner)
+                                
+    return lista                
 
 if __name__ == '__main__':
     import uvicorn
