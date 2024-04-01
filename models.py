@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -10,6 +10,7 @@ class user(BaseModel):
     name: str
     username: str
     password: str
+    balance: float
     token: str = None
     
     @validator('password')
@@ -29,6 +30,7 @@ class userRead(BaseModel):
     name: str
     username: str
     password: str
+    balance: float
     token: str = None
 
 class UserDB(Base):
@@ -38,4 +40,5 @@ class UserDB(Base):
     name = Column(String)
     username = Column(String)
     password = Column(String)
+    balance = Column(Float)
     token = Column(String)
