@@ -99,6 +99,29 @@ async def delete_user(id : int, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=404, detail='User Not Found')
 
+# UPDATE USER
+# TERMINAR !!
+
+# @app.put('/users/{id}', response_model=userRead)
+# async def update_user(id: int, upd_user: user , db: Session = Depends(get_db)):
+    
+#     db_user = db.query(UserDB).filter(UserDB.id == id).first()
+    
+#     if not db_user:
+#         raise HTTPException(status_code=404, detail='User Not Found')
+    
+#     for key, value in upd_user.dict().items():
+#         setattr(db_user, key, value)
+    
+#     user_dict  = db_user.dict()
+    
+#     user_dict['token'] = create_access_token(user_dict)
+        
+#     db.commit()
+#     db.refresh(db_user)
+    
+#     return db_user
+    
 
 @app.get('/api/matches')
 async def get_matches():
