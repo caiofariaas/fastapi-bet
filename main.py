@@ -8,29 +8,6 @@ import requests
 
 app = FastAPI()
 
-@app.get('/tokens', tags=['tokens'])
-async def get_tokens(db: Session = Depends(get_db)):
-    lista = []
-    
-    tokens = db.query(UserDB).all()
-    
-    if len(tokens) <= 0:
-        raise HTTPException(status_code=404, detail="Token not found!")
-    
-    for i in tokens:
-        lista.append(i.token)
-
-    return lista
-
-# API AMBER PEGANDO TOKEN
-
-@app.get('/token_gen/{username}', tags=['tokens'])
-async def get_token_by_username(username: str):
-    
-    token = create_access_token(username=username)
-    
-    return token
-
 # GET ALL USERS
 
 @app.get('/users', response_model=List[userRead], tags=['users'])
@@ -116,6 +93,30 @@ async def update_user(id: int, upd_user: user , db: Session = Depends(get_db)):
     db.refresh(db_user)
     
     return db_user
+
+@app.get('/tokens', tags=['tokens'])
+async def get_tokens(db: Session = Depends(get_db)):
+    lista = []
+    
+    tokens = db.query(UserDB).all()
+    
+    if len(tokens) <= 0:
+        raise HTTPException(status_code=404, detail="Token not found!")
+    
+    for i in tokens:
+        lista.append(i.token)
+
+    return lista
+
+# API AMBER PEGANDO TOKEN
+
+@app.get('/token_gen/{username}', tags=['tokens'])
+async def get_token_by_username(username: str):
+    
+    token = create_access_token(username=username)
+    
+    return token
+
 
 @app.get('/api/matches',  tags=['matches'])
 async def get_matches():
