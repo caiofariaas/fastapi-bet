@@ -8,28 +8,6 @@ import requests
 
 app = FastAPI()
 
-# CREATE USER
-
-@app.post('/users', response_model=userRead, tags=['users'])
-async def create_user(newUser: user, db: Session = Depends(get_db)):
-    
-    exists = db.query(UserDB).filter(UserDB.username == newUser.username).first()
-    
-    if exists:
-        raise HTTPException(status_code=409, detail="username is already being used")
-    
-    # TOKEN GEN FUNCTION
-    
-    newUser.token = create_access_token(newUser.username)
-    
-    db_user = UserDB(**newUser.model_dump())
-    
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
-    return db_user
-
 @app.get('/tokens', tags=['tokens'])
 async def get_tokens(db: Session = Depends(get_db)):
     lista = []
@@ -67,7 +45,7 @@ async def get_all_users(db: Session = Depends(get_db)):
     return users
     
 # FIND USER BY ID
-    
+
 @app.get('/users/{id}', response_model=userRead, tags=['users'])
 async def find_user_by_id(id: int, db:Session = Depends(get_db)):
     
@@ -75,6 +53,28 @@ async def find_user_by_id(id: int, db:Session = Depends(get_db)):
     
     if db_user is None:
         raise HTTPException(status_code=404, detail='User Not Found')
+
+    return db_user
+
+# CREATE USER
+
+@app.post('/users', response_model=userRead, tags=['users'])
+async def create_user(newUser: user, db: Session = Depends(get_db)):
+    
+    exists = db.query(UserDB).filter(UserDB.username == newUser.username).first()
+    
+    if exists:
+        raise HTTPException(status_code=409, detail="username is already being used")
+    
+    # TOKEN GEN FUNCTION
+    
+    newUser.token = create_access_token(newUser.username)
+    
+    db_user = UserDB(**newUser.model_dump())
+    
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
 
     return db_user
 
@@ -189,4 +189,4 @@ async def get_match_by_id(id: int):
 
 if __name__ == '__main__':
     import uvicorn
-    uvicorn.run("main:app", host='127.0.0.1', port=8000, reload=True)
+    uvicorn.run("main:app", host='0.0.0.0', port=8000, reload=True)
