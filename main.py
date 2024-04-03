@@ -8,11 +8,9 @@ import requests
 
 app = FastAPI()
 
-user_agent = {'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36'}
-
 # CREATE USER
 
-@app.post('/users', response_model=userRead)
+@app.post('/users', response_model=userRead, tags=['users'])
 async def create_user(newUser: user, db: Session = Depends(get_db)):
     
     exists = db.query(UserDB).filter(UserDB.username == newUser.username).first()
@@ -32,7 +30,7 @@ async def create_user(newUser: user, db: Session = Depends(get_db)):
 
     return db_user
 
-@app.get('/tokens')
+@app.get('/tokens', tags=['tokens'])
 async def get_tokens(db: Session = Depends(get_db)):
     lista = []
     
@@ -48,7 +46,7 @@ async def get_tokens(db: Session = Depends(get_db)):
 
 # API AMBER PEGANDO TOKEN
 
-@app.get('/token_gen/{username}')
+@app.get('/token_gen/{username}', tags=['tokens'])
 async def get_token_by_username(username: str):
     
     token = create_access_token(username=username)
@@ -57,7 +55,7 @@ async def get_token_by_username(username: str):
 
 # GET ALL USERS
 
-@app.get('/users', response_model=List[userRead])
+@app.get('/users', response_model=List[userRead], tags=['users'])
 async def get_all_users(db: Session = Depends(get_db)):
     
     users = db.query(UserDB).all()
@@ -70,7 +68,7 @@ async def get_all_users(db: Session = Depends(get_db)):
     
 # FIND USER BY ID
     
-@app.get('/users/{id}', response_model=userRead)
+@app.get('/users/{id}', response_model=userRead, tags=['users'])
 async def find_user_by_id(id: int, db:Session = Depends(get_db)):
     
     db_user = db.query(UserDB).filter(UserDB.id == id).first()
@@ -82,7 +80,7 @@ async def find_user_by_id(id: int, db:Session = Depends(get_db)):
 
 # DELETE USER
 
-@app.delete('/users/{id}')
+@app.delete('/users/{id}', tags=['users'])
 async def delete_user(id : int, db: Session = Depends(get_db)):
     
     db_user = db.query(UserDB).filter(UserDB.id == id).first()
@@ -100,35 +98,31 @@ async def delete_user(id : int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail='User Not Found')
 
 # UPDATE USER
-# TERMINAR !!
 
-# @app.put('/users/{id}', response_model=userRead)
-# async def update_user(id: int, upd_user: user , db: Session = Depends(get_db)):
+@app.put('/users/{id}', response_model=userRead, tags=['users'])
+async def update_user(id: int, upd_user: user , db: Session = Depends(get_db)):
     
-#     db_user = db.query(UserDB).filter(UserDB.id == id).first()
+    db_user = db.query(UserDB).filter(UserDB.id == id).first()
     
-#     if not db_user:
-#         raise HTTPException(status_code=404, detail='User Not Found')
+    if not db_user:
+        raise HTTPException(status_code=404, detail='User Not Found')
     
-#     for key, value in upd_user.dict().items():
-#         setattr(db_user, key, value)
-    
-#     user_dict  = db_user.dict()
-    
-#     user_dict['token'] = create_access_token(user_dict)
+    for key, value in upd_user.dict().items():
+        setattr(db_user, key, value)
+            
+    db_user.token = create_access_token(upd_user.username)
         
-#     db.commit()
-#     db.refresh(db_user)
+    db.commit()
+    db.refresh(db_user)
     
-#     return db_user
-    
+    return db_user
 
-@app.get('/api/matches')
+@app.get('/api/matches',  tags=['matches'])
 async def get_matches():
     
     lista = []
     
-    response = requests.get('https://api.sportmonks.com/v3/football/fixtures/upcoming/markets/1?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb', headers=user_agent)
+    response = requests.get('https://api.sportmonks.com/v3/football/fixtures/upcoming/markets/1?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb')
     data = response.json()
     
     if 'message' in data:
@@ -166,12 +160,12 @@ async def get_matches():
 
 # GET MATCH BY ID
 
-@app.get('/api/matches/{id}')
+@app.get('/api/matches/{id}',  tags=['matches'])
 async def get_match_by_id(id: int):
     
     # TRATAR EXCEÇÔES
     
-    response = requests.get(f"https://api.sportmonks.com/v3/football/fixtures/{id}?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb", headers=user_agent)
+    response = requests.get(f"https://api.sportmonks.com/v3/football/fixtures/{id}?api_token=5kmSGVTWIc73kw3gSY9txBnQS1QoR2UfyZ3OEcuKPGQVE3qpMuO9bZZVQFDb")
     data = response.json()
     
     if 'message' in data:
